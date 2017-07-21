@@ -33,8 +33,8 @@ function playing() {
   collidePlayer(xPlayer, yPlayer, asteroidTab);
   
   setTimeout(function(){
-      playing();
-    }, 30);
+    playing();
+  }, 30);
 }
 
 function generateAsteroid(number) {
