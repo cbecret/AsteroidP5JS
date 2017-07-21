@@ -6,6 +6,7 @@ let asteroidTab = [];
 
 let score = 0;
 let bestScore = 0;
+let playerLevel = 1;
 
 const pipi = Math.PI * 2;
 
@@ -55,14 +56,14 @@ function generateAsteroid(number) {
 }
 
 function draw() {
-  drawPlayer(xPlayer, yPlayer);
+  background(50,50,50);
   drawBullets(bulletTab);
   drawAsteroids(asteroidTab);
   drawScore(score);
+  drawPlayer(xPlayer, yPlayer);
 }
 
 function drawPlayer(xPlayer, yPlayer) {
-  background(50,50,50);
   fill(200,200,200);
   triangle(
       xPlayer + cos(anglePlayer) * 20, yPlayer + sin(anglePlayer) * 20,
@@ -101,6 +102,60 @@ function fire(xPlayer, yPlayer, anglePlayer) {
     angleBullet: anglePlayer,
     delay: 200
   });
+  if (playerLevel >= 2) {
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer - pipi/20,
+      delay: 200
+    });
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer + pipi/20,
+      delay: 200
+    });
+  }
+  if (playerLevel >= 3) {
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer + pipi / 40,
+      delay: 200
+    });
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer - pipi / 40,
+      delay: 200
+    });
+  }
+  if (playerLevel >= 4) {
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer + pipi / 10,
+      delay: 200
+    });
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer - pipi / 10,
+      delay: 200
+    });
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer + pipi / 30,
+      delay: 200
+    });
+    bulletTab.push({
+      xBullet: xPlayer,
+      yBullet: yPlayer,
+      angleBullet: anglePlayer - pipi / 30,
+      delay: 200
+    });
+  }
 }
 
 
@@ -190,6 +245,9 @@ function asteroidCollide(asteroid) {
   if (asteroid.size > 25) {
     score += Math.round((1/asteroid.size) * 1000);
     if (score > bestScore) bestScore = score;
+    if (score >= 1000) playerLevel = 2;
+    if (score >= 3000) playerLevel = 3;
+    if (score >= 6000) playerLevel = 4;
     let asteroidBis = {
       xAsteroid: asteroid.xAsteroid,
       yAsteroid: asteroid.yAsteroid,
@@ -227,6 +285,7 @@ function resetGame() {
   bulletTab = [];
   asteroidTab = [];
   score = 0;
+  playerLevel = 1;
   
   xPlayer = gameWidth / 2;
   yPlayer = gameHeight - 100;
