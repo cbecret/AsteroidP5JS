@@ -1,5 +1,5 @@
-let gameWidth = window.innerWidth - 100;
-let gameHeight = window.innerHeight - 100;
+let gameWidth = window.innerWidth;
+let gameHeight = window.innerHeight;
 
 let bulletTab = [];
 let asteroidTab = [];
@@ -9,9 +9,9 @@ let bestScore = 0;
 
 const pipi = Math.PI * 2;
 
-xPlayer = 100;
-yPlayer = 100;
-anglePlayer = pipi/4;
+xPlayer = gameWidth / 2;
+yPlayer = gameHeight - 100;
+anglePlayer = - pipi / 4;
 velocityPlayer = 0;
 
 xVelocityPlayer = 0;
@@ -65,19 +65,19 @@ function drawPlayer(xPlayer, yPlayer) {
   background(50,50,50);
   fill(200,200,200);
   triangle(
-      xPlayer, yPlayer + 15,
-      xPlayer + 15, yPlayer,
-      xPlayer - 15, yPlayer,
+      xPlayer + cos(anglePlayer) * 20, yPlayer + sin(anglePlayer) * 20,
+      xPlayer + cos(anglePlayer + pipi/4) * 20, yPlayer + sin(anglePlayer + pipi/4) * 20,
+      xPlayer + cos(anglePlayer - pipi/4) * 20, yPlayer + sin(anglePlayer - pipi/4) * 20,
     );
 }
 
 function drawScore(score) {
   textSize(32);
   fill(180, 180, 180);
-  text("Score: " + score, gameWidth - 180, 30);
+  text("Score: " + score, gameWidth - 180, 50);
   textSize(32);
   fill(180, 180, 180);
-  text("Best score: " + bestScore, 30, 30);
+  text("Best score: " + bestScore, 30, 50);
 }
 
 function drawBullets(bulletTab) {
@@ -228,9 +228,9 @@ function resetGame() {
   asteroidTab = [];
   score = 0;
   
-  xPlayer = 100;
-  yPlayer = 100;
-  anglePlayer = pipi/4;
+  xPlayer = gameWidth / 2;
+  yPlayer = gameHeight - 100;
+  anglePlayer = - pipi / 4;
   velocityPlayer = 0;
 
   xVelocityPlayer = 0;
