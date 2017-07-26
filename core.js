@@ -60,6 +60,7 @@ function draw() {
   drawBullets(bulletTab);
   drawAsteroids(asteroidTab);
   drawScore(score);
+  checkKeyboard();
   drawPlayer(xPlayer, yPlayer);
 }
 
@@ -159,16 +160,23 @@ function fire(xPlayer, yPlayer, anglePlayer) {
 }
 
 
+function checkKeyboard() {
+  if (keyIsDown(UP_ARROW)) {
+    velocityPlayer += 0.1;
+  }
+  if (keyIsDown(DOWN_ARROW)) {
+    velocityPlayer -= 0.1;
+  }
+  if (keyIsDown(LEFT_ARROW)) {
+    anglePlayer -= 0.07;
+  }
+  if (keyIsDown(RIGHT_ARROW)) {
+    anglePlayer += 0.07;
+  }
+}
+
 function keyPressed() {
-  if (keyCode === UP_ARROW) {
-    velocityPlayer += 1;
-  } else if (keyCode === DOWN_ARROW) {
-    velocityPlayer -= 1;
-  } else if (keyCode === LEFT_ARROW) {
-    anglePlayer -= 0.3;
-  } else if (keyCode === RIGHT_ARROW) {
-    anglePlayer += 0.3;
-  } else if (keyCode === 32) {
+  if (keyCode === 32) {
     fire(xPlayer, yPlayer, anglePlayer);
   }
 }
