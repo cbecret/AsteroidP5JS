@@ -7,6 +7,8 @@ let asteroidTab = [];
 let score = 0;
 let bestScore = 0;
 let playerLevel = 1;
+let weightPlayer = 5;
+let maxVelocity = 10;
 
 const pipi = Math.PI * 2;
 
@@ -14,9 +16,13 @@ xPlayer = gameWidth / 2;
 yPlayer = gameHeight - 100;
 anglePlayer = - pipi / 4;
 velocityPlayer = 0;
+accelerationPlayer = 0;
 
 xVelocityPlayer = 0;
 yVelocityPlayer = 0;
+
+xAccelerationPlayer = 0;
+yAccelerationPlayer = 0;
 
 function setup() {
   createCanvas(gameWidth, gameHeight);
@@ -65,11 +71,17 @@ function draw() {
 }
 
 function drawPlayer(xPlayer, yPlayer) {
+  fill(240, 10, 10);
+  ellipse(xPlayer - 12 * xAccelerationPlayer, yPlayer - 12 * yAccelerationPlayer, 15, 15);
+  fill(220, 30, 30);
+  ellipse(xPlayer - 18 * xAccelerationPlayer, yPlayer - 18 * yAccelerationPlayer, 10, 10);
+  fill(200, 50, 50);
+  ellipse(xPlayer - 24 * xAccelerationPlayer, yPlayer - 24 * yAccelerationPlayer, 5, 5);
   fill(200,200,200);
   triangle(
-      xPlayer + cos(anglePlayer) * 20, yPlayer + sin(anglePlayer) * 20,
-      xPlayer + cos(anglePlayer + pipi/4) * 20, yPlayer + sin(anglePlayer + pipi/4) * 20,
-      xPlayer + cos(anglePlayer - pipi/4) * 20, yPlayer + sin(anglePlayer - pipi/4) * 20,
+      xPlayer + cos(anglePlayer) * 30, yPlayer + sin(anglePlayer) * 30,
+      xPlayer + cos(anglePlayer + pipi/3) * 20, yPlayer + sin(anglePlayer + pipi/3) * 20,
+      xPlayer + cos(anglePlayer - pipi/3) * 20, yPlayer + sin(anglePlayer - pipi/3) * 20,
     );
 }
 
@@ -162,10 +174,13 @@ function fire(xPlayer, yPlayer, anglePlayer) {
 
 function checkKeyboard() {
   if (keyIsDown(UP_ARROW)) {
-    velocityPlayer += 0.1;
-  }
-  if (keyIsDown(DOWN_ARROW)) {
-    velocityPlayer -= 0.1;
+    if (accelerationPlayer < 1) {
+      accelerationPlayer += 0.1;
+    }
+  } else if (keyIsDown(DOWN_ARROW)) {
+    if (accelerationPlayer > -0.5) {
+      accelerationPlayer -= 0.1; 
+    }
   }
   if (keyIsDown(LEFT_ARROW)) {
     anglePlayer -= 0.07;
@@ -182,20 +197,26 @@ function keyPressed() {
 }
 
 function computePlayer() {
-  xVelocityPlayer = velocityPlayer * Math.cos(anglePlayer);
-  yVelocityPlayer = velocityPlayer * Math.sin(anglePlayer);
+  if (velocityPlayer < 0) {
+    accelerationPlayer = 0;
+  }
+  xAccelerationPlayer = accelerationPlayer * Math.cos(anglePlayer);
+  yAccelerationPlayer = accelerationPlayer * Math.sin(anglePlayer);
+  xVelocityPlayer += xAccelerationPlayer;
+  yVelocityPlayer += yAccelerationPlayer;
+
   ( xPlayer > gameWidth )
       ? xPlayer = 0
-      : xPlayer += xVelocityPlayer;
+      : xPlayer += (xVelocityPlayer / weightPlayer);
   ( yPlayer > gameHeight )
       ? yPlayer = 0
-      : yPlayer += yVelocityPlayer;
+      : yPlayer += (yVelocityPlayer / weightPlayer);
   ( xPlayer < 0 )
       ? xPlayer = gameWidth
-      : xPlayer += xVelocityPlayer;
+      : xPlayer += (xVelocityPlayer / weightPlayer);
   ( yPlayer < 0 )
       ? yPlayer = gameHeight
-      : yPlayer += yVelocityPlayer;
+      : yPlayer += (yVelocityPlayer / weightPlayer);
 }
 
 function computeBullets() {
