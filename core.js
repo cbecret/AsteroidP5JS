@@ -9,12 +9,12 @@ let bestScore = 0;
 let playerLevel = 1;
 
 this.maxSpeed = 10;
-this.godMod = false;
+this.godMod = true;
 
 const pipi = Math.PI * 2;
 
-xPlayer = gameWidth / 2;
-yPlayer = gameHeight - 100;
+xPlayer = 0;
+yPlayer = 0;
 anglePlayer = - pipi / 4;
 velocityPlayer = 0;
 
@@ -61,22 +61,21 @@ function draw() {
   drawBullets(bulletTab);
   drawAsteroids(asteroidTab);
   drawScore(score);
-  checkKeyboard();
   drawPlayer(xPlayer, yPlayer);
 }
 
-function drawPlayer(xPlayer, yPlayer) {
+function drawPlayer() {
   fill(240, 10, 10);
-  ellipse(xPlayer - 2 * xVelocityPlayer, yPlayer - 2 * yVelocityPlayer, 15, 15);
+  ellipse(gameWidth/2 - 2 * xVelocityPlayer, gameHeight/2 - 2 * yVelocityPlayer, 15, 15);
   fill(220, 30, 30);
-  ellipse(xPlayer - 4 * xVelocityPlayer, yPlayer - 4 * yVelocityPlayer, 10, 10);
+  ellipse(gameWidth/2 - 4 * xVelocityPlayer, gameHeight/2 - 4 * yVelocityPlayer, 10, 10);
   fill(200, 50, 50);
-  ellipse(xPlayer - 6 * xVelocityPlayer, yPlayer - 6 * yVelocityPlayer, 5, 5);
+  ellipse(gameWidth/2 - 6 * xVelocityPlayer, gameHeight/2 - 6 * yVelocityPlayer, 5, 5);
   fill(200,200,200);
   triangle(
-      xPlayer + cos(anglePlayer) * 30, yPlayer + sin(anglePlayer) * 30,
-      xPlayer + cos(anglePlayer + pipi/3) * 20, yPlayer + sin(anglePlayer + pipi/3) * 20,
-      xPlayer + cos(anglePlayer - pipi/3) * 20, yPlayer + sin(anglePlayer - pipi/3) * 20,
+      gameWidth/2 + cos(anglePlayer) * 30, gameHeight/2 + sin(anglePlayer) * 30,
+      gameWidth/2 + cos(anglePlayer + pipi/3) * 20, gameHeight/2 + sin(anglePlayer + pipi/3) * 20,
+      gameWidth/2 + cos(anglePlayer - pipi/3) * 20, gameHeight/2 + sin(anglePlayer - pipi/3) * 20,
     );
 }
 
@@ -92,21 +91,21 @@ function drawScore(score) {
 function drawBullets(bulletTab) {
   bulletTab.forEach(function(bullet) {
     fill(230 - bullet.delay,115 - (bullet.delay / 2),115 - (bullet.delay / 2));
-    ellipse(bullet.xBullet, bullet.yBullet, 10, 10);
+    ellipse(bullet.xBullet - xPlayer, bullet.yBullet - yPlayer, 10, 10);
   }, this);
 }
 
 function drawAsteroids(asteroidTab) {
   asteroidTab.forEach(function(asteroid) {
     fill(asteroid.red, asteroid.green, asteroid.blue);
-    ellipse(asteroid.xAsteroid, asteroid.yAsteroid, asteroid.size, asteroid.size);
+    ellipse(asteroid.xAsteroid - xPlayer, asteroid.yAsteroid - yPlayer, asteroid.size, asteroid.size);
   })
 }
 
 function fire(xPlayer, yPlayer, anglePlayer) {
   bulletTab.push({
-    xBullet: xPlayer,
-    yBullet: yPlayer,
+    xBullet: xPlayer + gameWidth/2,
+    yBullet: yPlayer + gameHeight/2,
     angleBullet: anglePlayer,
     delay: 200
   });
@@ -166,20 +165,25 @@ function fire(xPlayer, yPlayer, anglePlayer) {
   }
 }
 
-function checkKeyboard() {
-  if (keyIsDown(UP_ARROW)) {
-    if (velocityPlayer < this.maxSpeed) velocityPlayer += 0.2;
-  } else if (keyIsDown(DOWN_ARROW)) {
-    if (velocityPlayer > 0) velocityPlayer -= 0.4;
-    else velocityPlayer = 0;
-  }
-  if (keyIsDown(LEFT_ARROW)) {
-    anglePlayer -= 0.1;
-  }
-  if (keyIsDown(RIGHT_ARROW)) {
-    anglePlayer += 0.1;
-  }
+function mouseMoved(e) {
+  velocityPlayer = (sqrt(pow((e.clientY - gameHeight / 2), 2) + pow((e.clientX - gameWidth / 2), 2))) * maxSpeed / 400;
+  anglePlayer = atan2(e.clientY - gameHeight/2, e.clientX - gameWidth/2);
 }
+
+// function checkKeyboard() {
+//   if (keyIsDown(UP_ARROW)) {
+//     if (velocityPlayer < this.maxSpeed) velocityPlayer += 0.2;
+//   } else if (keyIsDown(DOWN_ARROW)) {
+//     if (velocityPlayer > 0) velocityPlayer -= 0.4;
+//     else velocityPlayer = 0;
+//   }
+//   if (keyIsDown(LEFT_ARROW)) {
+//     anglePlayer -= 0.1;
+//   }
+//   if (keyIsDown(RIGHT_ARROW)) {
+//     anglePlayer += 0.1;
+//   }
+// }
 
 function keyPressed() {
   if (keyCode === 32) {
@@ -191,18 +195,21 @@ function computePlayer() {
   xVelocityPlayer = velocityPlayer * Math.cos(anglePlayer);
   yVelocityPlayer = velocityPlayer * Math.sin(anglePlayer);
 
-  ( xPlayer > gameWidth )
-      ? xPlayer = 0
-      : xPlayer += xVelocityPlayer;
-  ( yPlayer > gameHeight )
-      ? yPlayer = 0
-      : yPlayer += yVelocityPlayer;
-  ( xPlayer < 0 )
-      ? xPlayer = gameWidth
-      : xPlayer += xVelocityPlayer;
-  ( yPlayer < 0 )
-      ? yPlayer = gameHeight
-      : yPlayer += yVelocityPlayer;
+  xPlayer += xVelocityPlayer;
+  yPlayer += yVelocityPlayer;
+
+  // ( xPlayer > gameWidth )
+  //     ? xPlayer = 0
+  //     : xPlayer += xVelocityPlayer;
+  // ( yPlayer > gameHeight )
+  //     ? yPlayer = 0
+  //     : yPlayer += yVelocityPlayer;
+  // ( xPlayer < 0 )
+  //     ? xPlayer = gameWidth
+  //     : xPlayer += xVelocityPlayer;
+  // ( yPlayer < 0 )
+  //     ? yPlayer = gameHeight
+  //     : yPlayer += yVelocityPlayer;
 }
 
 function computeBullets() {
@@ -217,27 +224,33 @@ function computeBullets() {
 }
 
 function computeAsteroids() {
-  asteroidTab.forEach(function(asteroid) {
-    ( asteroid.xAsteroid > gameWidth )
-        ? (asteroid.xAsteroid = 0)
-        : (asteroid.xAsteroid += asteroid.xVelocityAsteroid);
-    ( asteroid.yAsteroid > gameHeight )
-        ? (asteroid.yAsteroid = 0)
-        : (asteroid.yAsteroid += asteroid.yVelocityAsteroid);
-    ( asteroid.xAsteroid < 0 )
-        ? (asteroid.xAsteroid = gameWidth)
-        : (asteroid.xAsteroid += asteroid.xVelocityAsteroid);
-    ( asteroid.yAsteroid < 0 )
-        ? (asteroid.yAsteroid = gameHeight)
-        : (asteroid.yAsteroid += asteroid.yVelocityAsteroid);
+
+  asteroidTab.forEach(function (asteroid) {
+    asteroid.xAsteroid += asteroid.xVelocityAsteroid;
+    asteroid.yAsteroid += asteroid.yVelocityAsteroid;
   }, this);
+
+  // asteroidTab.forEach(function(asteroid) {
+  //   ( asteroid.xAsteroid > 10000 )
+  //       ? (asteroid.xAsteroid = 0)
+  //       : (asteroid.xAsteroid += asteroid.xVelocityAsteroid);
+  //   ( asteroid.yAsteroid > 10000 )
+  //       ? (asteroid.yAsteroid = 0)
+  //       : (asteroid.yAsteroid += asteroid.yVelocityAsteroid);
+  //   ( asteroid.xAsteroid < 0 )
+  //       ? (asteroid.xAsteroid = 10000)
+  //       : (asteroid.xAsteroid += asteroid.xVelocityAsteroid);
+  //   ( asteroid.yAsteroid < 0 )
+  //       ? (asteroid.yAsteroid = 10000)
+  //       : (asteroid.yAsteroid += asteroid.yVelocityAsteroid);
+  // }, this);
 }
 
 function checkCollision(asteroidTab, bulletTab) {
   asteroidTab.forEach(function(asteroid) {
     bulletTab.forEach(function(bullet) {
       if (Math.abs(bullet.xBullet - asteroid.xAsteroid) < asteroid.size
-       && Math.abs(bullet.yBullet - asteroid.yAsteroid) < asteroid.size) {
+      && Math.abs(bullet.yBullet - asteroid.yAsteroid) < asteroid.size) {
         asteroidCollide(asteroid);
         let bulletIndex = bulletTab.indexOf(bullet);
         destroyBullet(bulletIndex);
@@ -250,9 +263,9 @@ function checkCollision(asteroidTab, bulletTab) {
 function collidePlayer(xPlayer, yPlayer, asteroidTab) {
     asteroidTab.forEach(function(asteroid) {
       if (Math.abs(xPlayer - asteroid.xAsteroid) < (asteroid.size / 2)
-       && Math.abs(yPlayer - asteroid.yAsteroid) < (asteroid.size / 2)) {
+      && Math.abs(yPlayer - asteroid.yAsteroid) < (asteroid.size / 2)) {
         resetGame();
-       }
+      }
     })
 }
 
@@ -302,8 +315,8 @@ function resetGame() {
   score = 0;
   playerLevel = 1;
 
-  xPlayer = gameWidth / 2;
-  yPlayer = gameHeight - 100;
+  xPlayer = 0;
+  yPlayer = 0;
   anglePlayer = - pipi / 4;
   velocityPlayer = 0;
 
@@ -322,7 +335,7 @@ playing();
 var Options = function () {
   this.title = 'Asteroid Game';
   this.maxSpeed = 10;
-  this.godMod = false;
+  this.godMod = true;
   this.asteroidNumber = 10;
 };
 
