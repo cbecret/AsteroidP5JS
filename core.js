@@ -1,25 +1,26 @@
 let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 
-this.bulletTab = [];
-this.asteroidTab = [];
-
-let score = 0;
-let bestScore = 0;
-let playerLevel = 1;
-
 this.maxSpeed = 10;
 this.godMod = false;
 
 const pipi = Math.PI * 2;
 
-xPlayer = gameWidth / 2;
-yPlayer = gameHeight - 100;
-anglePlayer = - pipi / 4;
-velocityPlayer = 0;
+let bestScore = 0;
 
-xVelocityPlayer = 0;
-yVelocityPlayer = 0;
+
+
+let STATE = {
+  xPlayer: gameWidth / 2,
+  yPlayer: gameHeight - 100,
+  anglePlayer: - pipi / 4,
+  velocityPlayer: 0,
+  bulletTab: [],
+  asteroidTab: [],
+  score: 0,
+  playerLevel: 1
+}
+
 
 function setup() {
   createCanvas(gameWidth, gameHeight);
@@ -30,11 +31,11 @@ function setup() {
 var playing = function() {
   requestAnimationFrame(playing);
 
-  computePlayer();
-  computeBullets();
-  computeAsteroids();
-  checkCollision(asteroidTab, bulletTab);
-  if (!this.godMod) collidePlayer(xPlayer, yPlayer, asteroidTab);
+  computePlayer(STATE);
+  computeBullets(STATE);
+  computeAsteroids(STATE);
+  checkCollision(STATE);
+  if (!this.godMod) collidePlayer(STATE);
 
 }
 
@@ -52,115 +53,115 @@ function generateAsteroid(number) {
     }
     asteroid.xVelocityAsteroid = asteroid.velocityAsteroid * cos(asteroid.angle);
     asteroid.yVelocityAsteroid = asteroid.velocityAsteroid * sin(asteroid.angle);
-    asteroidTab.push(asteroid);
+    STATE.asteroidTab.push(asteroid);
   }
 }
 
 function draw() {
   background(50,50,50);
-  drawBullets(bulletTab);
-  drawAsteroids(asteroidTab);
-  drawScore(score);
+  drawBullets(STATE);
+  drawAsteroids(STATE);
+  drawScore(STATE);
   checkKeyboard();
-  drawPlayer(xPlayer, yPlayer);
+  drawPlayer(STATE);
 }
 
-function drawPlayer(xPlayer, yPlayer) {
+function drawPlayer(STATE) {
   fill(240, 10, 10);
-  ellipse(xPlayer - 2 * xVelocityPlayer, yPlayer - 2 * yVelocityPlayer, 15, 15);
+  ellipse(STATE.xPlayer - 2 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 2 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 15, 15);
   fill(220, 30, 30);
-  ellipse(xPlayer - 4 * xVelocityPlayer, yPlayer - 4 * yVelocityPlayer, 10, 10);
+  ellipse(STATE.xPlayer - 4 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 4 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 10, 10);
   fill(200, 50, 50);
-  ellipse(xPlayer - 6 * xVelocityPlayer, yPlayer - 6 * yVelocityPlayer, 5, 5);
+  ellipse(STATE.xPlayer - 6 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 6 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 5, 5);
   fill(200,200,200);
   triangle(
-      xPlayer + cos(anglePlayer) * 30, yPlayer + sin(anglePlayer) * 30,
-      xPlayer + cos(anglePlayer + pipi/3) * 20, yPlayer + sin(anglePlayer + pipi/3) * 20,
-      xPlayer + cos(anglePlayer - pipi/3) * 20, yPlayer + sin(anglePlayer - pipi/3) * 20,
+      STATE.xPlayer + cos(STATE.anglePlayer) * 30, STATE.yPlayer + sin(STATE.anglePlayer) * 30,
+      STATE.xPlayer + cos(STATE.anglePlayer + pipi/3) * 20, STATE.yPlayer + sin(STATE.anglePlayer + pipi/3) * 20,
+      STATE.xPlayer + cos(STATE.anglePlayer - pipi/3) * 20, STATE.yPlayer + sin(STATE.anglePlayer - pipi/3) * 20,
     );
 }
 
-function drawScore(score) {
+function drawScore(STATE) {
   textSize(32);
   fill(180, 180, 180);
-  text("Score: " + score, gameWidth - 180, 50);
+  text("Score: " + STATE.score, gameWidth - 180, 50);
   textSize(32);
   fill(180, 180, 180);
   text("Best score: " + bestScore, 30, 50);
 }
 
-function drawBullets(bulletTab) {
-  bulletTab.forEach(function(bullet) {
+function drawBullets(STATE) {
+  STATE.bulletTab.forEach(function(bullet) {
     fill(230 - bullet.delay,115 - (bullet.delay / 2),115 - (bullet.delay / 2));
     ellipse(bullet.xBullet, bullet.yBullet, 10, 10);
   }, this);
 }
 
-function drawAsteroids(asteroidTab) {
-  asteroidTab.forEach(function(asteroid) {
+function drawAsteroids(STATE) {
+  STATE.asteroidTab.forEach(function(asteroid) {
     fill(asteroid.red, asteroid.green, asteroid.blue);
     ellipse(asteroid.xAsteroid, asteroid.yAsteroid, asteroid.size, asteroid.size);
   })
 }
 
-function fire(xPlayer, yPlayer, anglePlayer) {
-  bulletTab.push({
-    xBullet: xPlayer,
-    yBullet: yPlayer,
-    angleBullet: anglePlayer,
+function fire(STATE) {
+  STATE.bulletTab.push({
+    xBullet: STATE.xPlayer,
+    yBullet: STATE.yPlayer,
+    angleBullet: STATE.anglePlayer,
     delay: 200
   });
-  if (playerLevel >= 2) {
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer - pipi/20,
+  if (STATE.playerLevel >= 2) {
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer - pipi/20,
       delay: 200
     });
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer + pipi/20,
-      delay: 200
-    });
-  }
-  if (playerLevel >= 3) {
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer + pipi / 40,
-      delay: 200
-    });
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer - pipi / 40,
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer + pipi/20,
       delay: 200
     });
   }
-  if (playerLevel >= 4) {
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer + pipi / 10,
+  if (STATE.playerLevel >= 3) {
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer + pipi / 40,
       delay: 200
     });
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer - pipi / 10,
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer - pipi / 40,
       delay: 200
     });
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer + pipi / 30,
+  }
+  if (STATE.playerLevel >= 4) {
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer + pipi / 10,
       delay: 200
     });
-    bulletTab.push({
-      xBullet: xPlayer,
-      yBullet: yPlayer,
-      angleBullet: anglePlayer - pipi / 30,
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer - pipi / 10,
+      delay: 200
+    });
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer + pipi / 30,
+      delay: 200
+    });
+    STATE.bulletTab.push({
+      xBullet: STATE.xPlayer,
+      yBullet: STATE.yPlayer,
+      angleBullet: STATE.anglePlayer - pipi / 30,
       delay: 200
     });
   }
@@ -168,47 +169,47 @@ function fire(xPlayer, yPlayer, anglePlayer) {
 
 function checkKeyboard() {
   if (keyIsDown(UP_ARROW)) {
-    if (velocityPlayer < this.maxSpeed) velocityPlayer += 0.2;
+    if (STATE.velocityPlayer < this.maxSpeed) STATE.velocityPlayer += 0.2;
   } else if (keyIsDown(DOWN_ARROW)) {
-    if (velocityPlayer > 0) velocityPlayer -= 0.4;
-    else velocityPlayer = 0;
+    if (STATE.velocityPlayer > 0) STATE.velocityPlayer -= 0.4;
+    else STATE.velocityPlayer = 0;
   }
   if (keyIsDown(LEFT_ARROW)) {
-    anglePlayer -= 0.1;
+    STATE.anglePlayer -= 0.1;
   }
   if (keyIsDown(RIGHT_ARROW)) {
-    anglePlayer += 0.1;
+    STATE.anglePlayer += 0.1;
   }
 }
 
 function keyPressed() {
   if (keyCode === 32) {
-    fire(xPlayer, yPlayer, anglePlayer);
+    fire(STATE);
   }
 }
 
 function computePlayer() {
-  xVelocityPlayer = velocityPlayer * Math.cos(anglePlayer);
-  yVelocityPlayer = velocityPlayer * Math.sin(anglePlayer);
+  xVelocityPlayer = STATE.velocityPlayer * Math.cos(STATE.anglePlayer);
+  yVelocityPlayer = STATE.velocityPlayer * Math.sin(STATE.anglePlayer);
 
-  ( xPlayer > gameWidth )
-      ? xPlayer = 0
-      : xPlayer += xVelocityPlayer;
-  ( yPlayer > gameHeight )
-      ? yPlayer = 0
-      : yPlayer += yVelocityPlayer;
-  ( xPlayer < 0 )
-      ? xPlayer = gameWidth
-      : xPlayer += xVelocityPlayer;
-  ( yPlayer < 0 )
-      ? yPlayer = gameHeight
-      : yPlayer += yVelocityPlayer;
+  ( STATE.xPlayer > gameWidth )
+      ? STATE.xPlayer = 0
+      : STATE.xPlayer += xVelocityPlayer;
+  ( STATE.yPlayer > gameHeight )
+      ? STATE.yPlayer = 0
+      : STATE.yPlayer += yVelocityPlayer;
+  ( STATE.xPlayer < 0 )
+      ? STATE.xPlayer = gameWidth
+      : STATE.xPlayer += xVelocityPlayer;
+  ( STATE.yPlayer < 0 )
+      ? STATE.yPlayer = gameHeight
+      : STATE.yPlayer += yVelocityPlayer;
 }
 
-function computeBullets() {
-  bulletTab.forEach(function(bullet) {
+function computeBullets(STATE) {
+  STATE.bulletTab.forEach(function(bullet) {
     if (bullet.delay == 0) {
-      bulletTab.shift();
+      STATE.bulletTab.shift();
     }
     bullet.xBullet += 20 * Math.cos(bullet.angleBullet);
     bullet.yBullet += 20 * Math.sin(bullet.angleBullet);
@@ -216,8 +217,8 @@ function computeBullets() {
   }, this);
 }
 
-function computeAsteroids() {
-  asteroidTab.forEach(function(asteroid) {
+function computeAsteroids(STATE) {
+  STATE.asteroidTab.forEach(function(asteroid) {
     ( asteroid.xAsteroid > gameWidth )
         ? (asteroid.xAsteroid = 0)
         : (asteroid.xAsteroid += asteroid.xVelocityAsteroid);
@@ -233,13 +234,13 @@ function computeAsteroids() {
   }, this);
 }
 
-function checkCollision(asteroidTab, bulletTab) {
-  asteroidTab.forEach(function(asteroid) {
-    bulletTab.forEach(function(bullet) {
+function checkCollision(STATE) {
+  STATE.asteroidTab.forEach(function(asteroid) {
+    STATE.bulletTab.forEach(function(bullet) {
       if (Math.abs(bullet.xBullet - asteroid.xAsteroid) < asteroid.size
        && Math.abs(bullet.yBullet - asteroid.yAsteroid) < asteroid.size) {
         asteroidCollide(asteroid);
-        let bulletIndex = bulletTab.indexOf(bullet);
+        let bulletIndex = STATE.bulletTab.indexOf(bullet);
         destroyBullet(bulletIndex);
       }
 
@@ -247,10 +248,10 @@ function checkCollision(asteroidTab, bulletTab) {
   })
 }
 
-function collidePlayer(xPlayer, yPlayer, asteroidTab) {
-    asteroidTab.forEach(function(asteroid) {
-      if (Math.abs(xPlayer - asteroid.xAsteroid) < (asteroid.size / 2)
-       && Math.abs(yPlayer - asteroid.yAsteroid) < (asteroid.size / 2)) {
+function collidePlayer(STATE) {
+  STATE.asteroidTab.forEach(function(asteroid) {
+      if (Math.abs(STATE.xPlayer - asteroid.xAsteroid) < (asteroid.size / 2)
+       && Math.abs(STATE.yPlayer - asteroid.yAsteroid) < (asteroid.size / 2)) {
         resetGame();
        }
     })
@@ -258,11 +259,11 @@ function collidePlayer(xPlayer, yPlayer, asteroidTab) {
 
 function asteroidCollide(asteroid) {
   if (asteroid.size > 25) {
-    score += Math.round((1/asteroid.size) * 1000);
-    if (score > bestScore) bestScore = score;
-    if (score >= 1000) playerLevel = 2;
-    if (score >= 3000) playerLevel = 3;
-    if (score >= 6000) playerLevel = 4;
+    STATE.score += Math.round((1/asteroid.size) * 1000);
+    if (STATE.score > bestScore) bestScore = STATE.score;
+    if (STATE.score >= 1000) playerLevel = 2;
+    if (STATE.score >= 3000) playerLevel = 3;
+    if (STATE.score >= 6000) playerLevel = 4;
     let asteroidBis = {
       xAsteroid: asteroid.xAsteroid,
       yAsteroid: asteroid.yAsteroid,
@@ -275,7 +276,7 @@ function asteroidCollide(asteroid) {
     }
     asteroidBis.xVelocityAsteroid = asteroidBis.velocityAsteroid * cos(asteroidBis.angle);
     asteroidBis.yVelocityAsteroid = asteroidBis.velocityAsteroid * sin(asteroidBis.angle);
-    asteroidTab.push(asteroidBis);
+    STATE.asteroidTab.push(asteroidBis);
 
     asteroid.size = (asteroid.size / 1.2);
     asteroid.velocityAsteroid += 1;
@@ -283,32 +284,31 @@ function asteroidCollide(asteroid) {
     asteroid.xVelocityAsteroid = asteroid.velocityAsteroid * cos(asteroid.angle);
     asteroid.yVelocityAsteroid = asteroid.velocityAsteroid * sin(asteroid.angle);
   } else {
-    let asteroidIndex = asteroidTab.indexOf(asteroid);
+    let asteroidIndex = STATE.asteroidTab.indexOf(asteroid);
     destroyAsteroid(asteroidIndex);
   }
 }
 
 function destroyBullet(bulletIndex) {
-  delete bulletTab[bulletIndex];
+  delete STATE.bulletTab[bulletIndex];
 }
 
 function destroyAsteroid(asteroidIndex) {
-  delete asteroidTab[asteroidIndex];
+  delete STATE.asteroidTab[asteroidIndex];
 }
 
 function resetGame() {
-  bulletTab = [];
-  asteroidTab = [];
-  score = 0;
-  playerLevel = 1;
+  console.log(STATE);
 
-  xPlayer = gameWidth / 2;
-  yPlayer = gameHeight - 100;
-  anglePlayer = - pipi / 4;
-  velocityPlayer = 0;
+  STATE.bulletTab = [];
+  STATE.asteroidTab = [];
+  STATE.score = 0;
+  STATE.playerLevel = 1;
 
-  xVelocityPlayer = 0;
-  yVelocityPlayer = 0;
+  STATE.xPlayer = gameWidth / 2;
+  STATE.yPlayer = gameHeight - 100;
+  STATE.anglePlayer = - pipi / 4;
+  STATE.velocityPlayer = 0;
 
   generateAsteroid(10);
 }
@@ -337,13 +337,12 @@ window.onload = function () {
     this.godMod = newValue;
   });;
   gui.add(options, 'asteroidNumber', 0, 100).onChange((newValue) => {
-    let deltaAsteroid = (asteroidTab.length - Math.floor(newValue));
+    let deltaAsteroid = (STATE.asteroidTab.length - Math.floor(newValue));
     if (deltaAsteroid > 0) {
-      this.asteroidTab.splice(1, deltaAsteroid);
+      STATE.asteroidTab.splice(1, deltaAsteroid);
     } else {
       generateAsteroid(-deltaAsteroid);
     }
-    console.log(this.asteroidTab)
   });
 
 };
