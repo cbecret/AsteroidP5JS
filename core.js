@@ -1,3 +1,12 @@
+const ACTIONS = {
+  0: "STAND",
+  1: "UP",
+  2: "DOWN",
+  3: "LEFT",
+  4: "RIGHT",
+  5: "FIRE"
+}
+
 let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 
@@ -37,6 +46,8 @@ var playing = function() {
   checkCollision(STATE);
   if (!this.godMod) collidePlayer(STATE);
 
+  cortex(STATE);
+
 }
 
 function generateAsteroid(number) {
@@ -68,11 +79,11 @@ function draw() {
 
 function drawPlayer(STATE) {
   fill(240, 10, 10);
-  ellipse(STATE.xPlayer - 2 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 2 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 15, 15);
+  ellipse(STATE.xPlayer - 14 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 14 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 15, 15);
   fill(220, 30, 30);
-  ellipse(STATE.xPlayer - 4 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 4 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 10, 10);
+  ellipse(STATE.xPlayer - 23 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 23 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 10, 10);
   fill(200, 50, 50);
-  ellipse(STATE.xPlayer - 6 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 6 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 5, 5);
+  ellipse(STATE.xPlayer - 34 * (STATE.velocityPlayer * Math.cos(STATE.anglePlayer)), STATE.yPlayer - 34 * (STATE.velocityPlayer * Math.sin(STATE.anglePlayer)), 5, 5);
   fill(200,200,200);
   triangle(
       STATE.xPlayer + cos(STATE.anglePlayer) * 30, STATE.yPlayer + sin(STATE.anglePlayer) * 30,
@@ -169,22 +180,44 @@ function fire(STATE) {
 
 function checkKeyboard() {
   if (keyIsDown(UP_ARROW)) {
-    if (STATE.velocityPlayer < this.maxSpeed) STATE.velocityPlayer += 0.2;
+    applyAction("UP")
   } else if (keyIsDown(DOWN_ARROW)) {
-    if (STATE.velocityPlayer > 0) STATE.velocityPlayer -= 0.4;
-    else STATE.velocityPlayer = 0;
+    applyAction("DOWN")
   }
   if (keyIsDown(LEFT_ARROW)) {
-    STATE.anglePlayer -= 0.1;
+    applyAction("LEFT")
   }
   if (keyIsDown(RIGHT_ARROW)) {
-    STATE.anglePlayer += 0.1;
+    applyAction("RIGHT")
+  }
+}
+
+function applyAction(action) {
+  switch (action) {
+    case "UP":
+      if (STATE.velocityPlayer < this.maxSpeed) STATE.velocityPlayer += 0.2;
+      break;
+    case "DOWN":
+      if (STATE.velocityPlayer > 0.4) STATE.velocityPlayer -= 0.4;
+      else STATE.velocityPlayer = 0;
+      break;
+    case "LEFT":
+      STATE.anglePlayer -= 0.1;
+      break;
+    case "RIGHT":
+      STATE.anglePlayer += 0.1;
+      break;
+    case "FIRE":
+      fire(STATE);
+      break;
+    default:
+      break;
   }
 }
 
 function keyPressed() {
   if (keyCode === 32) {
-    fire(STATE);
+    applyAction("FIRE");
   }
 }
 
@@ -329,6 +362,7 @@ var Options = function () {
 window.onload = function () {
   var options = new Options();
   var gui = new dat.GUI();
+  gui.close()
   gui.add(options, 'title');
   gui.add(options, 'maxSpeed', 1, 10, 1).onChange((newValue) => {
     this.maxSpeed = newValue;
@@ -346,3 +380,14 @@ window.onload = function () {
   });
 
 };
+
+
+
+function cortex(STATE) {
+  let alea = Math.random()
+  if (alea < 0.05) applyAction("UP")
+  else if (alea < 0.1) applyAction("DOWN")
+  else if (alea < 0.3) applyAction("LEFT")
+  else if (alea < 0.5) applyAction("RIGHT")
+  else if (alea < 0.55) applyAction("FIRE")
+}
